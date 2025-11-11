@@ -37,7 +37,7 @@ export function NotesEditor() {
   return (
     <div className="flex h-screen">
       <div className="flex-1 flex flex-col">
-        <div className="sticky top-0 z-10 bg-background border-b px-4 py-3">
+        <div className="sticky top-0 z-10 bg-background border-b-2 px-4 py-3">
           <div className="flex items-center justify-between gap-4 max-w-4xl mx-auto">
             <Input
               value={title}
@@ -47,10 +47,10 @@ export function NotesEditor() {
               data-testid="input-note-title"
             />
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" data-testid="button-discard">
+              <Button variant="outline" size="sm" data-testid="button-discard" className="active-elevate-2">
                 Discard
               </Button>
-              <Button size="sm" data-testid="button-save-note">
+              <Button size="sm" data-testid="button-save-note" className="active-elevate-2">
                 <Save className="h-4 w-4 mr-2" />
                 Save
               </Button>
@@ -58,13 +58,14 @@ export function NotesEditor() {
           </div>
         </div>
 
-        <div className="sticky top-[57px] z-10 bg-background border-b px-4 py-2">
+        <div className="sticky top-[57px] z-10 bg-background border-b-2 px-4 py-2">
           <div className="flex items-center gap-2 max-w-4xl mx-auto">
             <Button
               variant="ghost"
               size="sm"
               data-testid="button-bold"
               onClick={() => console.log("Bold clicked")}
+              className="active-elevate-2"
             >
               <Bold className="h-4 w-4" />
             </Button>
@@ -73,6 +74,7 @@ export function NotesEditor() {
               size="sm"
               data-testid="button-italic"
               onClick={() => console.log("Italic clicked")}
+              className="active-elevate-2"
             >
               <Italic className="h-4 w-4" />
             </Button>
@@ -81,6 +83,7 @@ export function NotesEditor() {
               size="sm"
               data-testid="button-heading"
               onClick={() => console.log("Heading clicked")}
+              className="active-elevate-2"
             >
               <Heading2 className="h-4 w-4" />
             </Button>
@@ -90,6 +93,7 @@ export function NotesEditor() {
               size="sm"
               data-testid="button-bullet-list"
               onClick={() => console.log("Bullet list clicked")}
+              className="active-elevate-2"
             >
               <List className="h-4 w-4" />
             </Button>
@@ -98,6 +102,7 @@ export function NotesEditor() {
               size="sm"
               data-testid="button-numbered-list"
               onClick={() => console.log("Numbered list clicked")}
+              className="active-elevate-2"
             >
               <ListOrdered className="h-4 w-4" />
             </Button>
@@ -107,6 +112,7 @@ export function NotesEditor() {
               size="sm"
               data-testid="button-code-block"
               onClick={() => console.log("Code block clicked")}
+              className="active-elevate-2"
             >
               <Code className="h-4 w-4" />
             </Button>
@@ -126,7 +132,7 @@ export function NotesEditor() {
         </div>
       </div>
 
-      <div className="w-80 border-l p-4 overflow-auto">
+      <div className="w-80 border-l-2 p-4 overflow-auto">
         <div className="space-y-6">
           <div>
             <h3 className="text-sm font-medium mb-3">Tags</h3>
@@ -135,7 +141,7 @@ export function NotesEditor() {
                 <Badge
                   key={tag}
                   variant={selectedTags.includes(tag) ? "default" : "outline"}
-                  className="cursor-pointer"
+                  className="cursor-pointer active-elevate-2 transition-all"
                   onClick={() => toggleTag(tag)}
                   data-testid={`badge-tag-${tag.toLowerCase()}`}
                 >
@@ -150,7 +156,7 @@ export function NotesEditor() {
 
           <div>
             <h3 className="text-sm font-medium mb-3">Note Info</h3>
-            <Card className="p-3">
+            <Card className="p-3 border-2">
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Created</span>

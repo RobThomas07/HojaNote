@@ -104,7 +104,7 @@ export function RemindersList() {
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button data-testid="button-add-reminder">
+            <Button data-testid="button-add-reminder" className="active-elevate-2">
               <Plus className="h-4 w-4 mr-2" />
               Add Reminder
             </Button>
@@ -189,7 +189,7 @@ export function RemindersList() {
       </div>
 
       <div className="space-y-8">
-        <Card>
+        <Card className="border-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               Active Reminders
@@ -206,7 +206,7 @@ export function RemindersList() {
                 {activeReminders.map((reminder) => (
                   <div
                     key={reminder.id}
-                    className="flex items-start gap-3 p-4 rounded-md border hover-elevate"
+                    className="flex items-start gap-3 p-4 rounded-md border-2 hover-elevate active-elevate-2 cursor-pointer transition-all"
                     data-testid={`reminder-${reminder.id}`}
                   >
                     <div className="flex items-center h-5 mt-0.5">
@@ -214,7 +214,7 @@ export function RemindersList() {
                         type="checkbox"
                         checked={reminder.completed}
                         onChange={() => toggleComplete(reminder.id)}
-                        className="h-4 w-4 rounded border-input cursor-pointer"
+                        className="h-5 w-5 rounded border-2 border-primary cursor-pointer"
                         data-testid={`checkbox-reminder-${reminder.id}`}
                       />
                     </div>
@@ -245,6 +245,7 @@ export function RemindersList() {
                         size="icon"
                         onClick={() => deleteReminder(reminder.id)}
                         data-testid={`button-delete-reminder-${reminder.id}`}
+                        className="active-elevate-2"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -257,7 +258,7 @@ export function RemindersList() {
         </Card>
 
         {completedReminders.length > 0 && (
-          <Card>
+          <Card className="border-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 Completed
@@ -269,7 +270,7 @@ export function RemindersList() {
                 {completedReminders.map((reminder) => (
                   <div
                     key={reminder.id}
-                    className="flex items-start gap-3 p-4 rounded-md border opacity-60"
+                    className="flex items-start gap-3 p-4 rounded-md border-2 opacity-60 hover-elevate transition-all"
                     data-testid={`reminder-completed-${reminder.id}`}
                   >
                     <div className="flex items-center h-5 mt-0.5">
@@ -277,7 +278,7 @@ export function RemindersList() {
                         type="checkbox"
                         checked={reminder.completed}
                         onChange={() => toggleComplete(reminder.id)}
-                        className="h-4 w-4 rounded border-input cursor-pointer"
+                        className="h-5 w-5 rounded border-2 border-primary cursor-pointer"
                       />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -289,6 +290,7 @@ export function RemindersList() {
                       variant="ghost"
                       size="icon"
                       onClick={() => deleteReminder(reminder.id)}
+                      className="active-elevate-2"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

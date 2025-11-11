@@ -123,7 +123,7 @@ export function ScheduleCalendar() {
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button data-testid="button-add-event">
+            <Button data-testid="button-add-event" className="active-elevate-2">
               <Plus className="h-4 w-4 mr-2" />
               Add Event
             </Button>
@@ -230,7 +230,7 @@ export function ScheduleCalendar() {
         </Dialog>
       </div>
 
-      <Card>
+      <Card className="border-2">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Week View</CardTitle>
@@ -239,6 +239,7 @@ export function ScheduleCalendar() {
                 variant="outline"
                 size="icon"
                 data-testid="button-prev-week"
+                className="active-elevate-2"
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
@@ -247,6 +248,7 @@ export function ScheduleCalendar() {
                 variant="outline"
                 size="icon"
                 data-testid="button-next-week"
+                className="active-elevate-2"
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
@@ -313,7 +315,7 @@ export function ScheduleCalendar() {
 
       <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
         {events.map((event) => (
-          <Card key={event.id} className="hover-elevate">
+          <Card key={event.id} className="hover-elevate active-elevate-2 cursor-pointer transition-all border-2">
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
                 <div className={`w-1 h-full ${event.color} rounded-full`} />

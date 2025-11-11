@@ -103,12 +103,12 @@ export function HandwrittenCanvas() {
 
   return (
     <div className="flex flex-col h-screen bg-muted/30">
-      <div className="flex items-center justify-between p-4 border-b bg-background">
+      <div className="flex items-center justify-between p-4 border-b-2 bg-background">
         <h2 className="text-lg font-semibold" data-testid="text-canvas-title">
           Handwritten Note
         </h2>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" data-testid="button-save-canvas">
+          <Button variant="outline" size="sm" data-testid="button-save-canvas" className="active-elevate-2">
             <Download className="h-4 w-4 mr-2" />
             Save
           </Button>
@@ -128,12 +128,13 @@ export function HandwrittenCanvas() {
       </div>
 
       <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-20">
-        <Card className="p-2 flex items-center gap-2 shadow-lg">
+        <Card className="p-2 flex items-center gap-2 shadow-lg border-2">
           <Button
             variant={tool === "pen" ? "default" : "ghost"}
             size="icon"
             onClick={() => setTool("pen")}
             data-testid="button-pen-tool"
+            className="active-elevate-2"
           >
             <Pen className="h-4 w-4" />
           </Button>
@@ -142,6 +143,7 @@ export function HandwrittenCanvas() {
             size="icon"
             onClick={() => setTool("eraser")}
             data-testid="button-eraser-tool"
+            className="active-elevate-2"
           >
             <Eraser className="h-4 w-4" />
           </Button>
@@ -170,7 +172,7 @@ export function HandwrittenCanvas() {
               type="color"
               value={color}
               onChange={(e) => setColor(e.target.value)}
-              className="w-8 h-8 rounded cursor-pointer"
+              className="w-8 h-8 rounded cursor-pointer border-2"
               data-testid="input-pen-color"
             />
           </div>
@@ -182,6 +184,7 @@ export function HandwrittenCanvas() {
             size="icon"
             onClick={() => console.log("Undo")}
             data-testid="button-undo"
+            className="active-elevate-2"
           >
             <Undo className="h-4 w-4" />
           </Button>
@@ -190,6 +193,7 @@ export function HandwrittenCanvas() {
             size="icon"
             onClick={() => console.log("Redo")}
             data-testid="button-redo"
+            className="active-elevate-2"
           >
             <Redo className="h-4 w-4" />
           </Button>
@@ -198,6 +202,7 @@ export function HandwrittenCanvas() {
             size="icon"
             onClick={clearCanvas}
             data-testid="button-clear-canvas"
+            className="active-elevate-2"
           >
             <Trash2 className="h-4 w-4" />
           </Button>

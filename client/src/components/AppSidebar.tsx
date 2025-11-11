@@ -85,7 +85,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup className="mt-auto px-2">
-          <Card className="overflow-hidden p-0">
+          <Card className="overflow-hidden p-0 border-2 hover-elevate active-elevate-2 transition-all cursor-pointer">
             <img
               src={ad1}
               alt="Advertisement"
@@ -99,7 +99,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-2">
-        <Card className="overflow-hidden p-0">
+        <Card className="overflow-hidden p-0 border-2 hover-elevate active-elevate-2 transition-all cursor-pointer">
           <img
             src={ad2}
             alt="Advertisement"
