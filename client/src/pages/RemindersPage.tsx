@@ -1,5 +1,9 @@
 import { RemindersList } from "@/components/RemindersList";
 
 export default function RemindersPage() {
-  return <RemindersList />;
+  return (
+    <div className="page-transition">
+      <RemindersList />
+    </div>
+  );
 }

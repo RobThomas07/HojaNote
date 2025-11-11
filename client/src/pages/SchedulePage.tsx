@@ -1,5 +1,9 @@
 import { ScheduleCalendar } from "@/components/ScheduleCalendar";
 
 export default function SchedulePage() {
-  return <ScheduleCalendar />;
+  return (
+    <div className="page-transition">
+      <ScheduleCalendar />
+    </div>
+  );
 }

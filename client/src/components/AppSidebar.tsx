@@ -18,12 +18,13 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Card } from "@/components/ui/card";
+import { useLocation } from "wouter";
 import ad1 from "@assets/generated_images/Student_app_sidebar_ad_a25a7b45.png";
 import ad2 from "@assets/generated_images/Tech_education_ad_placeholder_9b35500e.png";
 
 const menuItems = [
   {
-    title: "Dashboard",
+    title: "Home",
     url: "/",
     icon: Home,
   },
@@ -50,6 +51,8 @@ const menuItems = [
 ];
 
 export function AppSidebar() {
+  const [location] = useLocation();
+
   return (
     <Sidebar>
       <SidebarContent>
@@ -72,7 +75,7 @@ export function AppSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild data-testid={`link-${item.title.toLowerCase().replace(/\s+/g, '-')}`}>
+                  <SidebarMenuButton asChild isActive={location === item.url} data-testid={`link-${item.title.toLowerCase().replace(/\s+/g, '-')}`}>
                     <a href={item.url} className="flex items-center gap-3">
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>

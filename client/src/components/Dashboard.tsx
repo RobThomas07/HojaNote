@@ -23,7 +23,7 @@ export function Dashboard() {
   return (
     <div className="p-8 max-w-7xl mx-auto">
       <div className="mb-12">
-        <h1 className="text-3xl font-bold text-foreground" data-testid="text-dashboard-title">
+        <h1 className="text-3xl font-bold text-foreground" data-testid="text-home-title">
           Welcome to HojaNote
         </h1>
         <p className="text-muted-foreground mt-2 text-lg">

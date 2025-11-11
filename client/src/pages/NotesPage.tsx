@@ -1,5 +1,9 @@
 import { NotesEditor } from "@/components/NotesEditor";
 
 export default function NotesPage() {
-  return <NotesEditor />;
+  return (
+    <div className="page-transition h-full">
+      <NotesEditor />
+    </div>
+  );
 }
