@@ -1,18 +1,65 @@
 import { useRef, useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { handwrittenNotesService } from "@/services/handwrittenNotesService";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Pen, Eraser, Undo, Redo, Trash2, Download } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Pen,
+  Eraser,
+  Undo,
+  Redo,
+  Trash2,
+  Save,
+  ArrowLeft,
+  X,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 type DrawingTool = "pen" | "eraser";
 
-export function HandwrittenCanvas() {
+interface HandwrittenCanvasProps {
+  noteId?: string;
+  onBack?: () => void;
+}
+
+export function HandwrittenCanvas({ noteId, onBack }: HandwrittenCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [tool, setTool] = useState<DrawingTool>("pen");
   const [penSize, setPenSize] = useState(2);
   const [color, setColor] = useState("#000000");
+  const [title, setTitle] = useState("Untitled Handwritten Note");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [isNewNote, setIsNewNote] = useState(!noteId);
+  const [historyStack, setHistoryStack] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  
+  const { currentUser } = useAuth();
+  const { toast } = useToast();
 
-  useEffect(() => {
+  const availableTags = [
+    "Biology",
+    "Mathematics",
+    "History",
+    "Chemistry",
+    "English",
+    "Physics",
+    "Art",
+    "Sketch",
+    "Diagram",
+    "General",
+  ];
+
+  const toggleTag = (tag: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
+
+  const initializeCanvas = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -46,7 +93,88 @@ export function HandwrittenCanvas() {
     };
 
     drawGrid();
+    saveToHistory();
+  };
+
+  useEffect(() => {
+    initializeCanvas();
   }, []);
+
+  useEffect(() => {
+    if (noteId && currentUser) {
+      const unsubscribe = handwrittenNotesService.subscribeToUserNotes(
+        currentUser.uid,
+        (notes) => {
+          const note = notes.find((n) => n.id === noteId);
+          if (note) {
+            setTitle(note.title);
+            setSelectedTags(note.tags);
+            setIsNewNote(false);
+            
+            const canvas = canvasRef.current;
+            if (canvas && note.imageUrl) {
+              const ctx = canvas.getContext("2d");
+              if (ctx) {
+                const img = new Image();
+                img.crossOrigin = "anonymous";
+                img.onload = () => {
+                  ctx.drawImage(img, 0, 0);
+                  saveToHistory();
+                };
+                img.src = note.imageUrl;
+              }
+            }
+          }
+        }
+      );
+
+      return () => unsubscribe();
+    }
+  }, [noteId, currentUser]);
+
+  const saveToHistory = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const imageData = canvas.toDataURL();
+    setHistoryStack((prev) => {
+      const newStack = prev.slice(0, historyIndex + 1);
+      newStack.push(imageData);
+      return newStack.slice(-20);
+    });
+    setHistoryIndex((prev) => Math.min(prev + 1, 19));
+  };
+
+  const undo = () => {
+    if (historyIndex > 0) {
+      const newIndex = historyIndex - 1;
+      setHistoryIndex(newIndex);
+      loadFromHistory(historyStack[newIndex]);
+    }
+  };
+
+  const redo = () => {
+    if (historyIndex < historyStack.length - 1) {
+      const newIndex = historyIndex + 1;
+      setHistoryIndex(newIndex);
+      loadFromHistory(historyStack[newIndex]);
+    }
+  };
+
+  const loadFromHistory = (imageData: string) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const img = new Image();
+    img.onload = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+    };
+    img.src = imageData;
+  };
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
     setIsDrawing(true);
@@ -86,7 +214,10 @@ export function HandwrittenCanvas() {
   };
 
   const stopDrawing = () => {
-    setIsDrawing(false);
+    if (isDrawing) {
+      setIsDrawing(false);
+      saveToHistory();
+    }
   };
 
   const clearCanvas = () => {
@@ -98,21 +229,179 @@ export function HandwrittenCanvas() {
 
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    console.log("Canvas cleared");
+    saveToHistory();
+  };
+
+  const handleSave = async () => {
+    if (!currentUser) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Not authenticated. Please log in.",
+      });
+      return;
+    }
+    
+    const canvas = canvasRef.current;
+    if (!canvas) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Canvas not found.",
+      });
+      return;
+    }
+
+    try {
+      setSaving(true);
+      console.log("Starting save...", { isNewNote, noteId, title });
+      const imageData = canvas.toDataURL("image/png");
+      console.log("Canvas data URL created", { dataLength: imageData.length });
+      
+      if (isNewNote) {
+        console.log("Creating new note...");
+        await handwrittenNotesService.createNote(
+          currentUser.uid,
+          title,
+          imageData,
+          selectedTags
+        );
+        console.log("Note created successfully");
+        setIsNewNote(false);
+        toast({
+          title: "Note created",
+          description: "Your handwritten note has been saved successfully.",
+        });
+        if (onBack) {
+          onBack();
+        }
+      } else if (noteId) {
+        console.log("Updating existing note...", { noteId });
+        await handwrittenNotesService.updateNote(currentUser.uid, noteId, {
+          title,
+          imageData,
+          tags: selectedTags,
+        });
+        console.log("Note updated successfully");
+        toast({
+          title: "Note updated",
+          description: "Your changes have been saved.",
+        });
+      }
+    } catch (error) {
+      console.error("Error saving note:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to save note. Please try again.",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!noteId || isNewNote || !currentUser) return;
+    
+    if (confirm("Are you sure you want to delete this note?")) {
+      try {
+        await handwrittenNotesService.deleteNote(currentUser.uid, noteId);
+        toast({
+          title: "Note deleted",
+          description: "The note has been removed.",
+        });
+        if (onBack) {
+          onBack();
+        }
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to delete note. Please try again.",
+        });
+        console.error("Error deleting note:", error);
+      }
+    }
+  };
+
+  const handleDiscard = () => {
+    if (isNewNote || confirm("Discard unsaved changes?")) {
+      if (onBack) {
+        onBack();
+      }
+    }
   };
 
   return (
     <div className="flex flex-col h-screen bg-muted/30">
       <div className="flex items-center justify-between p-4 border-b-2 bg-background">
-        <h2 className="text-lg font-semibold" data-testid="text-canvas-title">
-          Handwritten Note
-        </h2>
+        <div className="flex items-center gap-2 flex-1">
+          {onBack && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDiscard}
+              className="active-elevate-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          )}
+          <Input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="text-lg font-semibold border-none shadow-none focus-visible:ring-0 px-0 max-w-md"
+            placeholder="Note title..."
+            data-testid="input-note-title"
+          />
+        </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" data-testid="button-save-canvas" className="active-elevate-2">
-            <Download className="h-4 w-4 mr-2" />
-            Save
+          {!isNewNote && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDelete}
+              className="active-elevate-2"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleDiscard}
+            data-testid="button-discard"
+            className="active-elevate-2"
+          >
+            Discard
+          </Button>
+          <Button
+            size="sm"
+            onClick={handleSave}
+            disabled={saving}
+            data-testid="button-save-canvas"
+            className="active-elevate-2"
+          >
+            <Save className="h-4 w-4 mr-2" />
+            {saving ? "Saving..." : "Save"}
           </Button>
         </div>
+      </div>
+
+      <div className="flex items-center gap-2 px-4 py-2 border-b bg-background overflow-x-auto">
+        <span className="text-sm font-medium">Tags:</span>
+        {availableTags.map((tag) => (
+          <Badge
+            key={tag}
+            variant={selectedTags.includes(tag) ? "default" : "outline"}
+            className="cursor-pointer active-elevate-2 transition-all"
+            onClick={() => toggleTag(tag)}
+            data-testid={`badge-tag-${tag.toLowerCase()}`}
+          >
+            {tag}
+            {selectedTags.includes(tag) && <X className="h-3 w-3 ml-1" />}
+          </Badge>
+        ))}
       </div>
 
       <div className="flex-1 relative overflow-hidden p-4">
@@ -122,7 +411,7 @@ export function HandwrittenCanvas() {
           onMouseMove={draw}
           onMouseUp={stopDrawing}
           onMouseLeave={stopDrawing}
-          className="w-full h-full rounded-md shadow-sm cursor-crosshair"
+          className="w-full h-full rounded-md shadow-sm cursor-crosshair bg-white"
           data-testid="canvas-drawing"
         />
       </div>
@@ -182,7 +471,8 @@ export function HandwrittenCanvas() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => console.log("Undo")}
+            onClick={undo}
+            disabled={historyIndex <= 0}
             data-testid="button-undo"
             className="active-elevate-2"
           >
@@ -191,7 +481,8 @@ export function HandwrittenCanvas() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => console.log("Redo")}
+            onClick={redo}
+            disabled={historyIndex >= historyStack.length - 1}
             data-testid="button-redo"
             className="active-elevate-2"
           >
